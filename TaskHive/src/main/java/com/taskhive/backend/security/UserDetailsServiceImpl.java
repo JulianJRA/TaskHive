@@ -13,7 +13,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
 
-    public UserDetailsServiceImpl(UserRepository userRepository){
+    public UserDetailsServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -21,10 +21,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+        
+        // extrae el role sin el prefijo ROLE_ para pasarlo a .roles()
+        String roleWithoutPrefix = user.getRole().name().replace("ROLE_", "");
+
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getEmail())
                 .password(user.getPassword())
-                .roles(user.getRoles().toArray(new String[0]))
+                .roles(roleWithoutPrefix) // Spring añade ROLE_ automáticamente
                 .build();
     }
+
 }
