@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.taskhive.backend.model.LoginRequest;
 import com.taskhive.backend.model.LoginResponse;
+import com.taskhive.backend.model.OAuthLoginRequest;
 import com.taskhive.backend.model.RegisterRequest;
 import com.taskhive.backend.model.User;
 import com.taskhive.backend.security.JwtUtil;
@@ -50,4 +51,16 @@ public class AuthController {
                     .body(new LoginResponse("Usuario o contraseña incorrectos"));
         }
     }
+    
+    @PostMapping("/oauth-login")
+    public ResponseEntity<LoginResponse> oauthLogin(@RequestBody OAuthLoginRequest request) {
+        try {
+            User user = userService.processOAuthLogin(request.getProvider(), request.getAccessToken());
+            String token = jwtUtil.generateToken(user);
+            return ResponseEntity.ok(new LoginResponse(token));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(new LoginResponse("Error: " + e.getMessage()));
+        }
+    }
+
 }

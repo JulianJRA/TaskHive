@@ -1,8 +1,6 @@
 package com.taskhive.backend.security;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -20,16 +18,16 @@ public class JwtUtil {
     private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     public String generateToken(User user) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("role", "ROLE_" + user.getRole().name()); // añade el ROLE_ para Spring
         return Jwts.builder()
-                .setClaims(claims)
                 .setSubject(user.getEmail())
+                .claim("role", user.getRole().name())
+                .claim("provider", user.getProvider())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(key)
                 .compact();
     }
+
 
     public String extractUsername(String token) {
         return Jwts.parserBuilder()
